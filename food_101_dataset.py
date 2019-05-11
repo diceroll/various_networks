@@ -29,8 +29,8 @@ class Food101Dataset(DatasetMixin):
                 url = 'http://data.vision.ee.ethz.ch/cvl/food-101.tar.gz'
                 tar_file = dataset_dir / 'food-101.tar.gz'
 
-                file_size = int(requests.head(url).headers["content-length"])
                 res = requests.get(url, stream=True)
+                file_size = int(res.headers["Content-Length"])
                 if res.status_code == 200:
                     with tqdm(total=file_size, unit="B", unit_scale=True) as pbar:
                         with open(tar_file, 'wb') as f:
@@ -52,7 +52,8 @@ class Food101Dataset(DatasetMixin):
             self.labels.extend([i] * len(data[k]))
 
         if train:
-            NG_list = ['bread_pudding/1375816', 'lasagna/3787908', 'steak/1340977']
+            NG_list = ['bread_pudding/1375816',
+                       'lasagna/3787908', 'steak/1340977']
             for ng_img in NG_list:
                 ng_index = self.imgs.index(ng_img)
                 del self.imgs[ng_index]
