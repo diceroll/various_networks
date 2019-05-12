@@ -30,9 +30,9 @@ def main():
     parser.add_argument('--seed', '-s', type=int, default=0,
                         help='Random seed')
     parser.add_argument('--report_trigger', '-rt', type=str, default='1e',
-                        help='Interval for reporting(Ex.100i, default:1e)')
+                        help='Interval for reporting (Ex.100i/1e)')
     parser.add_argument('--save_trigger', '-st', type=str, default='1e',
-                        help='Interval for saving the model(Ex.100i, default:1e)')
+                        help='Interval for saving the model (Ex.100i/1e)')
     parser.add_argument('--load_model', '-lm', type=str, default=None,
                         help='Path of the model object to load')
     parser.add_argument('--load_optimizer', '-lo', type=str, default=None,
@@ -61,7 +61,8 @@ def main():
         chainer.cuda.get_device_from_id(args.gpu).use()
         model.to_gpu()
 
-    optimizer = optimizers.Adam(alpha=1e-3, weight_decay_rate=1e-4, amsgrad=True)
+    optimizer = optimizers.Adam(
+        alpha=1e-3, weight_decay_rate=1e-4, amsgrad=True)
     optimizer.setup(model)
     if args.load_optimizer is not None:
         serializers.load_npz(args.load_optimizer, optimizer)
@@ -83,26 +84,38 @@ def main():
     valid_data = Food101Dataset(train=False, augmentation=resize)
 
     train_iter = iterators.SerialIterator(train_data, args.batchsize)
-    valid_iter = iterators.SerialIterator(valid_data, args.batchsize, repeat=False, shuffle=False)
+    valid_iter = iterators.SerialIterator(
+        valid_data, args.batchsize, repeat=False, shuffle=False)
 
     updater = StandardUpdater(train_iter, optimizer, device=args.gpu)
     trainer = Trainer(updater, (args.epoch, 'epoch'), out=save_dir)
 
-    report_trigger = (int(args.report_trigger[:-1]), 'iteration' if args.report_trigger[-1] == 'i' else 'epoch')
+    report_trigger = (
+        int(args.report_trigger[:-1]),
+        'iteration' if args.report_trigger[-1] == 'i' else 'epoch')
     trainer.extend(extensions.LogReport(trigger=report_trigger))
-    trainer.extend(extensions.Evaluator(valid_iter, model, device=args.gpu), name='val', trigger=report_trigger)
-    trainer.extend(extensions.PrintReport(['epoch', 'iteration', 'main/loss', 'main/accuracy', 'val/main/loss',
-                                           'val/main/accuracy', 'elapsed_time']), trigger=report_trigger)
-    trainer.extend(extensions.PlotReport(['main/loss', 'val/main/loss'], x_key=report_trigger[1],
-                                         marker='.', file_name='loss.png', trigger=report_trigger))
-    trainer.extend(extensions.PlotReport(['main/accuracy', 'val/main/accuracy'], x_key=report_trigger[1],
-                                         marker='.', file_name='accuracy.png', trigger=report_trigger))
+    trainer.extend(extensions.Evaluator(
+        valid_iter, model, device=args.gpu),
+        name='val', trigger=report_trigger)
+    trainer.extend(extensions.PrintReport(
+        ['epoch', 'iteration', 'main/loss', 'main/accuracy', 'val/main/loss',
+         'val/main/accuracy', 'elapsed_time']), trigger=report_trigger)
+    trainer.extend(extensions.PlotReport(
+        ['main/loss', 'val/main/loss'], x_key=report_trigger[1],
+        marker='.', file_name='loss.png', trigger=report_trigger))
+    trainer.extend(extensions.PlotReport(
+        ['main/accuracy', 'val/main/accuracy'], x_key=report_trigger[1],
+        marker='.', file_name='accuracy.png', trigger=report_trigger))
 
-    save_trigger = (int(args.save_trigger[:-1]), 'iteration' if args.save_trigger[-1] == 'i' else 'epoch')
-    trainer.extend(extensions.snapshot_object(model, filename='model_{0}-{{.updater.{0}}}.npz'
-                                              .format(save_trigger[1])), trigger=save_trigger)
-    trainer.extend(extensions.snapshot_object(optimizer, filename='optimizer_{0}-{{.updater.{0}}}.npz'
-                                              .format(save_trigger[1])), trigger=save_trigger)
+    save_trigger = (
+        int(args.save_trigger[:-1]),
+        'iteration' if args.save_trigger[-1] == 'i' else 'epoch')
+    trainer.extend(extensions.snapshot_object(
+        model, filename='model_{0}-{{.updater.{0}}}.npz'
+        .format(save_trigger[1])), trigger=save_trigger)
+    trainer.extend(extensions.snapshot_object(
+        optimizer, filename='optimizer_{0}-{{.updater.{0}}}.npz'
+        .format(save_trigger[1])), trigger=save_trigger)
     trainer.extend(extensions.ProgressBar())
 
     if save_dir.exists():
