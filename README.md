@@ -38,7 +38,7 @@
 
 ## Experiment
 
-- **Model** : SEResNet50/GCResNet50/AAResNet50
+- **Model** : SE-ResNet50/GC-ResNet50/AA-ResNet50/SE-Res2Net50
 - **Optimizer** : AdamW + AMSGrad (alpha: 1e-3, weight_decay_rate: 1e-4)
 - **Epoch** : 100
 - **Batch Size** : 64
