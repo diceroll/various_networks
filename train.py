@@ -80,8 +80,9 @@ def main():
         'Resize': {'p': 1.0, 'height': 224, 'width': 224, 'interpolation': 2}
     }
 
-    train_data = Food101Dataset(augmentation=augmentation)
-    valid_data = Food101Dataset(train=False, augmentation=resize)
+    sl = slice(0, None, 5)
+    train_data = Food101Dataset(augmentation=augmentation, drop_index=sl)
+    valid_data = Food101Dataset(augmentation=resize, index=sl)
 
     train_iter = iterators.SerialIterator(train_data, args.batchsize)
     valid_iter = iterators.SerialIterator(

@@ -40,6 +40,8 @@ class Food101Dataset(DatasetMixin):
                 with tarfile.open(tar_file, 'r:gz') as tf:
                     tf.extractall(path=dataset_dir)
                 tar_file.unlink()
+        else:
+            self.data_dir = data_dir
 
         self.imgs = []
         self.labels = []
@@ -84,9 +86,7 @@ class Food101Dataset(DatasetMixin):
 
         if self.augmentation is not None:
             img = self.augmentation(image=img)['image']
-            if img.shape != (224, 224, 3):
-                print(img.shape, self.imgs[i])
-            img = img.transpose((2, 0, 1))
+        img = img.transpose((2, 0, 1))
         img = img / 127.5 - 1.0
 
         return img, label

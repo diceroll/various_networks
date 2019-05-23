@@ -12,7 +12,7 @@ class GCBlock(chainer.Chain):
         reduction_size = n_channel // ratio
 
         with self.init_scope():
-            self.context = L.Convolution2D(n_channel, 1, ksize=1)
+            self.context = L.Convolution2D(n_channel, 1, ksize=1, nobias=True)
             self.down = L.Linear(n_channel, reduction_size)
             self.ln = L.LayerNormalization(reduction_size)
             self.up = L.Linear(reduction_size, n_channel)
